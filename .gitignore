@@ -244,3 +244,6 @@ ModelManifest.xml
 # custom
 dist
 edited_maps
+Content/*
+RandoBruter/*
+SeedData*

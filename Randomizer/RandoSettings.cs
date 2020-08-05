@@ -138,16 +138,14 @@ namespace Celeste.Mod.Randomizer {
 
         public void SetNormalMaps() {
             foreach (var key in RandoLogic.AvailableAreas) {
-                if (key.GetLevelSet() == "Celeste") {
                     this.EnableMap(key);
-                }
             }
         }
 
         private IEnumerable<uint> HashParts() {
-            yield return (uint)RandoModule.Instance.Metadata.Version.Major;
-            yield return (uint)RandoModule.Instance.Metadata.Version.Minor;
-            yield return (uint)RandoModule.Instance.Metadata.Version.Build;
+            yield return 0;
+            yield return 3;
+            yield return 2;
             yield return this.IntSeed;
             yield return RepeatRooms ? 1u : 0u;
             yield return EnterUnknown ? 1u : 0u;
@@ -157,30 +155,6 @@ namespace Celeste.Mod.Randomizer {
             yield return (uint)Difficulty;
             yield return (uint)Lights;
             yield return (uint)Darkness;
-
-            var sortedMaps = new List<AreaKeyNotStupid>(IncludedMaps);
-            sortedMaps.Sort((AreaKeyNotStupid x, AreaKeyNotStupid y) => {
-                var xs = x.Stupid.GetSID();
-                var ys = y.Stupid.GetSID();
-                var cmp1 = xs.CompareTo(ys);
-                if (cmp1 != 0) {
-                    return cmp1;
-                }
-                if (x.Mode < y.Mode) {
-                    return -1;
-                }
-                if (x.Mode > y.Mode) {
-                    return 1;
-                }
-                return 0;
-            });
-            foreach (var thing in sortedMaps) {
-                yield return (uint)thing.Mode;
-                foreach (var ch in thing.Stupid.GetSID()) {
-                    yield return (uint)ch;
-                }
-                yield return 0u;
-            }
         }
 
         public string Hash {

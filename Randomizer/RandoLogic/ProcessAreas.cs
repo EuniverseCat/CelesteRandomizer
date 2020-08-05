@@ -137,7 +137,6 @@ namespace Celeste.Mod.Randomizer {
             if (RandoLogic.AllRooms.Count != 0) {
                 return;
             }
-            Logger.Log("randomizer", "Processing level data...");
 
             foreach (var area in AreaData.Areas) {
                 RandoLogic.ProcessArea(area);

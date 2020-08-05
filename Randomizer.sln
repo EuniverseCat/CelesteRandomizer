@@ -1,11 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29230.47
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Randomizer", "Randomizer\Randomizer.csproj", "{8CBA6958-CD94-44B4-970B-5FC3DBE6B019}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Celeste.Mod.mm", "..\Everest\Celeste.Mod.mm\Celeste.Mod.mm.csproj", "{D5D0239D-FF95-4897-9484-1898AB7E82F5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "god i don't know", "god i don't know\god i don't know.csproj", "{934526E1-63C1-4C59-A9C2-F3E9512CD141}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8CBA6958-CD94-44B4-970B-5FC3DBE6B019} = {8CBA6958-CD94-44B4-970B-5FC3DBE6B019}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,8 +26,15 @@ Global
 		{D5D0239D-FF95-4897-9484-1898AB7E82F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5D0239D-FF95-4897-9484-1898AB7E82F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5D0239D-FF95-4897-9484-1898AB7E82F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{934526E1-63C1-4C59-A9C2-F3E9512CD141}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{934526E1-63C1-4C59-A9C2-F3E9512CD141}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{934526E1-63C1-4C59-A9C2-F3E9512CD141}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{934526E1-63C1-4C59-A9C2-F3E9512CD141}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {03CC161B-5B13-4491-8C8D-D1315B382A50}
 	EndGlobalSection
 EndGlobal

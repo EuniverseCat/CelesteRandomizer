@@ -12,7 +12,6 @@ namespace Celeste.Mod.Randomizer {
             public LinkedRoom NewRoom;
 
             public static StartRoomReceipt Do(RandoLogic logic, StaticRoom newRoomStatic) {
-                Logger.Log("randomizer", $"Adding room {newRoomStatic.Name} at start");
                 var newRoom = new LinkedRoom(newRoomStatic, Vector2.Zero);
 
                 logic.Map.AddRoom(newRoom);
@@ -28,7 +27,6 @@ namespace Celeste.Mod.Randomizer {
             }
 
             public override void Undo() {
-                Logger.Log("randomizer", $"Undo: Adding room {NewRoom.Static.Name} at start");
                 Logic.Map.RemoveRoom(NewRoom);
 
                 if (!this.Logic.Settings.RepeatRooms) {
@@ -75,8 +73,7 @@ namespace Celeste.Mod.Randomizer {
                 if (!logic.Settings.RepeatRooms) {
                     logic.RemainingRooms.Remove(toRoomStatic);
                 }
-
-                Logger.Log("randomizer", $"Adding room {toRoomStatic.Name} at {newPosition} ({logic.Map.Count})");
+				
                 return new ConnectAndMapReceipt {
                     NewRoom = toRoom,
                     Logic = logic,
@@ -86,7 +83,6 @@ namespace Celeste.Mod.Randomizer {
             }
 
             public override void Undo() {
-                Logger.Log("randomizer", $"Undo: Adding room {NewRoom.Static.Name} at {NewRoom.Bounds}");
                 this.Logic.Map.RemoveRoom(this.NewRoom);
                 this.Edge.NodeA.Edges.Remove(this.Edge);
                 this.Edge.NodeB.Edges.Remove(this.Edge);
@@ -102,7 +98,6 @@ namespace Celeste.Mod.Randomizer {
             private StaticCollectable Place;
 
             public static PlaceCollectableReceipt Do(LinkedNode node, StaticCollectable place, LinkedNode.LinkedCollectable item) {
-                Logger.Log("randomizer", $"Placing collectable {item} in {node.Room.Static.Name}:{node.Static.Name}");
                 node.Collectables[place] = item;
                 return new PlaceCollectableReceipt {
                     Node = node,
@@ -111,7 +106,6 @@ namespace Celeste.Mod.Randomizer {
             }
 
             public override void Undo() {
-                Logger.Log("randomizer", $"Undo: Placing collectable in {Node.Room.Static.Name}:{Node.Static.Name}");
                 this.Node.Collectables.Remove(this.Place);
             }
         }

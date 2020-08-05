@@ -35,45 +35,39 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Celeste">
-      <HintPath>..\..\Everest\lib-stripped\Celeste.exe</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\CelesteTAS-EverestInterop\Everest\lib-stripped\Celeste.exe</HintPath>
     </Reference>
     <Reference Include="FNA">
-      <HintPath>..\..\Everest\lib-stripped\FNA.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\..\Saved Games\Celestemain\FNA.dll</HintPath>
     </Reference>
     <Reference Include="MMHOOK_Celeste">
-      <HintPath>..\packages\MMHOOK_Celeste.dll</HintPath>
+      <HintPath>..\..\..\..\Saved Games\Celestemain\MMHOOK_Celeste.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil">
-      <HintPath>..\packages\Mono.Cecil.dll</HintPath>
+      <HintPath>..\..\..\..\Saved Games\Celestemain\Mono.Cecil.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil.Mdb">
-      <HintPath>..\packages\Mono.Cecil.Mdb.dll</HintPath>
+      <HintPath>..\..\..\..\Saved Games\Celestemain\Mono.Cecil.Mdb.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil.Pdb">
-      <HintPath>..\packages\Mono.Cecil.Pdb.dll</HintPath>
+      <HintPath>..\..\..\..\Saved Games\Celestemain\Mono.Cecil.Pdb.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil.Rocks">
-      <HintPath>..\packages\Mono.Cecil.Rocks.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Steamworks.NET">
-      <HintPath>..\..\Everest\lib-stripped\Steamworks.NET.dll</HintPath>
+      <HintPath>..\..\..\..\Saved Games\Celestemain\Mono.Cecil.Rocks.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="YamlDotNet">
-      <HintPath>..\packages\YamlDotNet.dll</HintPath>
+      <HintPath>..\..\..\..\Saved Games\Celestemain\YamlDotNet.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.Utils">
-      <HintPath>..\packages\MonoMod.Utils.dll</HintPath>
+      <HintPath>..\..\..\..\Saved Games\Celestemain\MonoMod.Utils.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -93,18 +87,10 @@
     <Compile Include="RandoLogic\LogicLabyrinth.cs" />
     <Compile Include="Deque.cs" />
     <Compile Include="RandoLogic\LogicPathway.cs" />
-    <Compile Include="OuiMapPicker.cs" />
     <Compile Include="RandoLogic\LinkedRoom.cs" />
     <Compile Include="RandoLogic\Receipt.cs" />
     <Compile Include="PriorityQueue.cs" />
     <Compile Include="RandoLogic\Requirements.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Everest\Celeste.Mod.mm\Celeste.Mod.mm.csproj">
-      <Project>{d5d0239d-ff95-4897-9484-1898ab7e82f5}</Project>
-      <Name>Celeste.Mod.mm</Name>
-      <Private>False</Private>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="everest.yaml">
@@ -169,11 +155,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Config\" />
-    <Folder Include="Dialog\" />
-    <Folder Include="Graphics\" />
-    <Folder Include="RandoLogic\" />
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

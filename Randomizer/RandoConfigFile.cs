@@ -10,28 +10,22 @@ namespace Celeste.Mod.Randomizer {
         public List<RandoConfigRoom> CSide { get; set; }
 
         public static RandoConfigFile Load(AreaData area) {
-            String fullpath = "Config/" + area.GetSID() + ".rando";
-            if (!Everest.Content.TryGet(fullpath, out ModAsset asset)) {
-                return null;
-            } else {
-                try {
-                    using (StreamReader reader = new StreamReader(asset.Stream)) {
-                        return YamlHelper.Deserializer.Deserialize<RandoConfigFile>(reader);
-                    }
-                } catch (Exception e) {
-                    Logger.Log("randomizer", $"Failed loading config for area {area}: {e.Message}");
-                    return null;
-                }
+
+			string fullpath = Directory.GetCurrentDirectory() + "/Randomizer/Config/Celeste";
+
+			string file;
+			if (area.ID == 10)
+				file = Directory.GetFiles(fullpath, "Lost*")[0];
+			else
+				file = Directory.GetFiles(fullpath, area.ID + "*.rando.yaml")[0];
+            using (StreamReader reader = new StreamReader(file)) {
+                return new DeserializerBuilder().IgnoreUnmatchedProperties().Build().Deserialize<RandoConfigFile>(reader);
             }
         }
 
         public static void YamlSkeleton(MapData map) {
             foreach (LevelData lvl in map.Levels) {
                 List<Hole> holes = RandoLogic.FindHoles(lvl);
-                if (holes.Count > 0) {
-                    Logger.Log("randomizer", $"  - Room: \"{lvl.Name}\"");
-                    Logger.Log("randomizer", "    Holes:");
-                }
                 ScreenDirection lastDirection = ScreenDirection.Up;
                 int holeIdx = -1;
                 foreach (Hole hole in holes) {
@@ -43,26 +37,18 @@ namespace Celeste.Mod.Randomizer {
                     }
 
                     LevelData targetlvl = map.GetAt(hole.LowCoord(lvl.Bounds)) ?? map.GetAt(hole.HighCoord(lvl.Bounds));
-                    if (targetlvl != null) {
-                        Logger.Log("randomizer", $"    - Side: {hole.Side}");
-                        Logger.Log("randomizer", $"      Idx: {holeIdx}");
-                        Logger.Log("randomizer", "      Kind: inout");
-                    }
                 }
             }
         }
 
         public static void YamlSkeleton(AreaData area) {
             if (area.Mode[0] != null) {
-                Logger.Log("randomizer", "ASide:");
                 YamlSkeleton(area.Mode[0].MapData);
             }
             if (area.Mode.Length > 1 && area.Mode[1] != null) {
-                Logger.Log("randomizer", "BSide:");
                 YamlSkeleton(area.Mode[1].MapData);
             }
             if (area.Mode.Length > 2 && area.Mode[2] != null) {
-                Logger.Log("randomizer", "CSide:");
                 YamlSkeleton(area.Mode[2].MapData);
             }
         }

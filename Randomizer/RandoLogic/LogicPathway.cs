@@ -29,7 +29,7 @@ namespace Celeste.Mod.Randomizer {
                     return null;
                 }
 
-                var picked = available[this.Logic.Random.Next(available.Count)];
+                var picked = available[Logic.Random.Next(available.Count)];
                 return StartRoomReceipt.Do(this.Logic, picked);
             }
 
@@ -60,7 +60,6 @@ namespace Celeste.Mod.Randomizer {
                 var closure = LinkedNodeSet.Closure(this.Node, this.Logic.Caps, null, true);
                 var available = closure.UnlinkedEdges((UnlinkedEdge u) => !this.TriedEdges.Contains(u.Static) && this.Logic.Map.HoleFree(this.Node.Room, u.Static.HoleTarget));
                 if (available.Count == 0) {
-                    Logger.Log("randomizer", $"Failure: No edges out of {Node.Room.Static.Name}:{Node.Static.Name}");
                     return false;
                 }
 
@@ -72,7 +71,6 @@ namespace Celeste.Mod.Randomizer {
                 if (reqNeeded is Possible) {
                     // nothing needed
                 } else if (reqNeeded is KeyRequirement keyReq) {
-                    Logger.Log("randomizer", $"Need to place a key from {Node.Room.Static.Name}:{Node.Static.Name} to get out of {picked.Static.HoleTarget}");
                     this.AddNextTask(new TaskPathwayPlaceKey(this.Logic, this.Node, keyReq.KeyholeID));
                 } else {
                     throw new Exception("why does this happen? this should not happen");
@@ -113,10 +111,8 @@ namespace Celeste.Mod.Randomizer {
 
             public override bool Next() {
                 var receipt = this.WorkingPossibility();
-                if (receipt == null) {
-                    Logger.Log("randomizer", $"Failure: could not find a room that fits on {Edge.Node.Room.Static.Name}:{Edge.Node.Static.Name}:{Edge.Static.HoleTarget}");
+                if (receipt == null)
                     return false;
-                }
 
                 this.AddReceipt(receipt);
                 this.TriedRooms.Add(receipt.NewRoom.Static);
@@ -160,7 +156,6 @@ namespace Celeste.Mod.Randomizer {
 
             public override bool Next() {
                 if (this.Tries >= 5) {
-                    Logger.Log("randomizer", $"Failure: took too many tries to place key from {Node.Room.Static.Name}:{Node.Static.Name}");
                     return false;
                 }
 

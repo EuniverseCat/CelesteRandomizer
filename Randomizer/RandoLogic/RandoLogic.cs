@@ -6,17 +6,9 @@ using Monocle;
 namespace Celeste.Mod.Randomizer {
     public partial class RandoLogic {
         public static AreaKey GenerateMap(RandoSettings settings) {
-            var lastarea = AreaData.Areas[AreaData.Areas.Count - 1];
-            var newID = AreaData.Areas.Count;
-            if (lastarea.GetLevelSet() == "randomizer") {
-                newID--;
-            }
 
-            var newArea = new AreaData {
-                IntroType = Player.IntroTypes.WakeUp,
-                Interlude = false,
-                Dreaming = false,
-                ID = newID,
+            AreaData newArea = new AreaData {
+                ID = 1337,
                 Name = $"{settings.Seed}_{settings.Hash}",
                 Mode = new ModeProperties[3] {
                     new ModeProperties {
@@ -25,50 +17,30 @@ namespace Celeste.Mod.Randomizer {
                                                                         PlayerInventory.CH6End,
                     }, null, null
                 },
-                Icon = AreaData.Areas[0].Icon,
-                MountainIdle = AreaData.Areas[0].MountainIdle,
-                MountainZoom = AreaData.Areas[0].MountainZoom,
-                MountainState = AreaData.Areas[0].MountainState,
-                MountainCursor = new Vector3(0, 100000, 0),  // ???
-                MountainSelect = AreaData.Areas[0].MountainSelect,
-                MountainCursorScale = AreaData.Areas[0].MountainCursorScale,
-            };
-            newArea.SetMeta(new Meta.MapMeta {
-                Modes = new Meta.MapMetaModeProperties[] {
-                    new Meta.MapMetaModeProperties {
-                        HeartIsEnd = true,
-                        //SeekerSlowdown = true,  // this doesn't do anything
-                    },
-                    null, null
-                }
-            });
-            newArea.OnLevelBegin = (level) => {
-                level.Add(new SeekerEffectsController());
             };
 
-            newArea.SetSID($"randomizer/{newArea.Name}");
-            if (lastarea.GetSID().StartsWith("randomizer/")) {
-                AreaData.Areas[AreaData.Areas.Count - 1] = newArea;
-            } else {
-                AreaData.Areas.Add(newArea);
-            }
+			AreaKey key = default;
 
-            var key = new AreaKey(newArea.ID);
+			RandoLogic r = new RandoLogic(settings, key);
 
-            var r = new RandoLogic(settings, key);
-
+			/*
             newArea.Wipe = r.PickWipe();
             newArea.CompleteScreenName = r.PickCompleteScreen();
             newArea.CassetteSong = r.PickCassetteAudio();
             newArea.Mode[0].AudioState = new AudioState(r.PickMusicAudio(), r.PickAmbienceAudio());
+			*/
+			r.Toss(4);
+			
             newArea.Mode[0].MapData = r.MakeMap();
-            r.RandomizeDialog();
 
-            Logger.Log("randomizer", $"new area {newArea.GetSID()}");
+			//r.RandomizeDialog();
+
+			//foreach (LinkedRoom room in r.Map.Rooms) Console.WriteLine(room.Static.Name);
 
             return key;
         }
 
+		public string Seed;
         private Random Random;
         private List<StaticRoom> RemainingRooms;
         private AreaKey Key;
@@ -80,10 +52,11 @@ namespace Celeste.Mod.Randomizer {
         public static Dictionary<string, string> RandomDialogMappings = new Dictionary<string, string>();
 
         private RandoLogic(RandoSettings settings, AreaKey key) {
+			this.Seed = settings.Seed;
             this.Random = new Random((int)settings.IntSeed);
             this.Settings = settings;
             this.RemainingRooms = new List<StaticRoom>();
-            foreach (var room in RandoLogic.AllRooms) {
+            foreach (StaticRoom room in AllRooms) {
                 if (settings.MapIncluded(room.Area)) {
                     this.RemainingRooms.Add(room);
                 }
@@ -97,7 +70,13 @@ namespace Celeste.Mod.Randomizer {
             };
         }
 
-        private Action<Scene, bool, Action> PickWipe() {
+		private void Toss(int toToss) {
+			for (int i = 0; i < toToss; i++)
+				Random.Next();
+		}
+
+		#region skippedPrep
+		private Action<Scene, bool, Action> PickWipe() {
             switch (this.Random.Next(10)) {
                 case 0:
                 default:
@@ -122,7 +101,6 @@ namespace Celeste.Mod.Randomizer {
                     return (scene, wipeIn, onComplete) => new StarfieldWipe(scene, wipeIn, onComplete);
             }
         }
-
         private string PickMusicAudio() {
             switch (this.Random.Next(52)) {
                 case 0:
@@ -223,7 +201,6 @@ namespace Celeste.Mod.Randomizer {
                     return SFX.music_farewell_end_cinematic;
             }
         }
-
         private string PickAmbienceAudio() {
             return "event:/env/amb/04_main"; // only way to get wind effects?
             /*
@@ -264,7 +241,6 @@ namespace Celeste.Mod.Randomizer {
             }
             */           
         }
-
         private string PickCassetteAudio() {
             switch (this.Random.Next(8)) {
                 case 0:
@@ -286,7 +262,6 @@ namespace Celeste.Mod.Randomizer {
                     return SFX.cas_08_core;
             }
         }
-
         private string PickCompleteScreen() {
             switch (this.Random.Next(8)) {
                 case 0:
@@ -308,8 +283,9 @@ namespace Celeste.Mod.Randomizer {
                     return AreaData.Areas[9].CompleteScreenName;
             }
         }
+		#endregion // 4 rng calls
 
-        private MapData MakeMap() {
+		public MapData MakeMap() {
             this.Map = new LinkedMap();
 
             switch (this.Settings.Algorithm) {
@@ -323,36 +299,32 @@ namespace Celeste.Mod.Randomizer {
             }
 
             while (this.Tasks.Count != 0) {
-                var nextTask = this.Tasks.RemoveFromFront();
+                RandoTask nextTask = this.Tasks.RemoveFromFront();
 
                 while (!nextTask.Next()) {
                     if (this.CompletedTasks.Count == 0) {
                         throw new Exception("Could not generate map");
                     }
 
-                    this.Tasks.AddToFront(nextTask);
+                    Tasks.AddToFront(nextTask);
                     nextTask = this.CompletedTasks.Pop();
                     nextTask.Undo();
                 }
 
-                this.CompletedTasks.Push(nextTask);
+               CompletedTasks.Push(nextTask);
             }
 
-            var map = new MapData(this.Key);
+            MapData map = new MapData(this.Key);
             map.Levels = new List<LevelData>();
 
+			//unsure that this is necessary
             this.Map.FillMap(map, this.Random);
-            this.SetMapBounds(map);
-            this.SetForeground(map);
-            this.SetBackground(map);
-            this.SetPoem();
-            this.SpawnGolden(map);
-            this.SetDarkness(map);
 
             return map;
         }
 
-        private void SetMapBounds(MapData map) {
+		#region moreRemovals
+		private void SetMapBounds(MapData map) {
             int num1 = int.MaxValue;
             int num2 = int.MaxValue;
             int num3 = int.MinValue;
@@ -462,8 +434,9 @@ namespace Celeste.Mod.Randomizer {
                 }
             }
         }
-
+		
         private void SetPoem() {
+			/*
             string poem;
             if (this.Random.Next(100) == 0) {
                 poem = Dialog.Clean($"RANDOHEART_FIXED_{Random.Next(int.Parse(Dialog.Clean("RANDOHEART_FIXED_COUNT")))}");
@@ -475,6 +448,7 @@ namespace Celeste.Mod.Randomizer {
             AreaData.Get(this.Key).Mode[0].PoemID = key;
             Dialog.Language.Dialog["POEM_" + key] = poem;
             Dialog.Language.Cleaned["POEM_" + key] = poem;
+			*/
         }
 
         private void SpawnGolden(MapData map) {
@@ -517,8 +491,9 @@ namespace Celeste.Mod.Randomizer {
                 RandomDialogMappings[sortedDialogIDs[i].ToLower()] = sortedDialogIDs[Calc.Clamp(i + (rand == 0 ? 1 : rand), 0, sortedDialogIDs.Count-1)].ToLower();
             }
         }
+		#endregion
 
-        private List<StaticEdge> AvailableNewEdges(Capabilities capsIn, Capabilities capsOut, Func<StaticEdge, bool> filter=null) {
+		private List<StaticEdge> AvailableNewEdges(Capabilities capsIn, Capabilities capsOut, Func<StaticEdge, bool> filter=null) {
             var result = new List<StaticEdge>();
 
             foreach (var room in this.RemainingRooms) {
