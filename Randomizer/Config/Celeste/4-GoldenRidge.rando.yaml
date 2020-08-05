@@ -149,6 +149,11 @@ ASide:
     - Room: "Berry"
       Collectables:
       - Idx: 0
+    ExtraSpace:
+    - X: 256
+      Y: -48
+      Width: 48
+      Height: 48
   - Room: "a-07"
     Holes:
     - Side: Left
@@ -360,11 +365,6 @@ ASide:
     - Side: Left
       Idx: 0
       Kind: inout
-    Tweaks:
-    - ID: 23
-      Name: "booster"
-      Update:
-        Y: 160
     InternalEdges:
     - Split: RightToLeft
       ReqOut:
@@ -468,6 +468,7 @@ ASide:
         X: 360
         Width: 16
   - Room: "b-sec"  # TODO: mark the heart as requiring the dashes, not the entrances
+    End: true
     Holes:
     - Side: Right
       Idx: 0
@@ -479,7 +480,6 @@ ASide:
       Kind: inout
       ReqIn:
         Dashes: one
-    End: true
   - Room: "b-secb"
     Holes:
     - Side: Left
@@ -497,6 +497,15 @@ ASide:
     - Side: Down
       Idx: 0
       Kind: inout
+    InternalEdges:
+    - Split: BottomToTop
+      ReqOut:
+        Or:
+        - Dashes: one
+        - Dashes: zero
+          Difficulty: hard
+      ReqIn:
+        Dashes: one
     Tweaks:
     - Name: "spawn"
       Update:
@@ -582,6 +591,9 @@ ASide:
     - Side: Right
       Idx: 0
       Kind: inout
+    - Side: Down
+      Idx: 0
+      Kind: none
     InternalEdges:
     - Collectable: 0
       ReqBoth:
@@ -717,6 +729,11 @@ ASide:
       Update:
         X: 72
         Width: 16
+    ExtraSpace:
+    - X: 272
+      Y: 128
+      Width: 24
+      Height: 96
   - Room: "c-07"
     Holes:
     - Side: Right
@@ -1132,6 +1149,10 @@ BSide:
       Y: 168
       Update:
         X: 32
+    - ID: 23
+      Name: "booster"
+      Update:
+        Y: 160
   - Room: "c-00"
     Holes:
     - Side: Right
@@ -1218,6 +1239,9 @@ BSide:
     - Side: Down
       Idx: 0
       Kind: inout
+    - Side: Up
+      Idx: 0
+      Kind: None
     InternalEdges:
     - Split: LeftToRight
       ReqOut:
@@ -1316,13 +1340,13 @@ BSide:
       Idx: 0
       Kind: in
   - Room: "end"
+    End: true
     Holes:
     - Side: Left
       Idx: 0
       Kind: inout
       ReqIn:
         Dashes: one
-    End: true
 
 CSide:
   - Room: "00"
@@ -1367,6 +1391,7 @@ CSide:
           cameraX: 0
           cameraY: 1.5
   - Room: "02"
+    End: true
     Holes:
     - Side: Left
       Idx: 0
@@ -1376,4 +1401,3 @@ CSide:
         - Dashes: two
         - Dashes: one
           Difficulty: hard
-    End: true

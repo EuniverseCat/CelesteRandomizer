@@ -3,8 +3,10 @@ using Microsoft.Xna.Framework;
 using Monocle;
 using System;
 using System.Collections;
+using System.Linq;
 using MonoMod.Cil;
 using MonoMod.Utils;
+using System.Collections.Generic;
 
 namespace Celeste.Mod.Randomizer {
     public class RandoModule {
@@ -17,6 +19,5 @@ namespace Celeste.Mod.Randomizer {
 			Instance = this;
 			Settings = new RandoSettings();
 		}
-
     }
 }

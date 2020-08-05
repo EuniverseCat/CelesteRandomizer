@@ -202,6 +202,7 @@ ASide:
       Idx: 0
       Kind: inout
   - Room: "04c"
+    End: true
     Holes:
     - Side: Right
       Idx: 0
@@ -209,7 +210,6 @@ ASide:
       ReqIn:
         Difficulty: hard
         Dashes: one
-    End: true
   - Room: "04d"
     Holes:
     - Side: Left
@@ -366,6 +366,15 @@ ASide:
     - Side: Left
       Idx: 0
       Kind: inout
+    InternalEdges:
+    - Split: LeftToRight
+      ReqOut:
+        Dashes: zero
+      ReqIn:
+        Or:
+        - Dashes: one
+        - Dashes: zero
+          Difficulty: hard
     Tweaks:
     - Name: "cameraOffsetTrigger"
       Update:
@@ -1081,6 +1090,7 @@ ASide:
     - Side: Up
       Idx: 0
       Kind: inout
+      Launch: 19
       ReqOut:
         Dashes: one
     - Side: Down
@@ -1213,7 +1223,7 @@ BSide:
       ReqIn:
         Or:
         - Dashes: one
-          Difficulty: expert
+          Difficulty: perfect
         - Dashes: two
           Difficulty: normal
     Tweaks:
@@ -1248,6 +1258,19 @@ BSide:
     - Side: Left
       Idx: 0
       Kind: in
+    ExtraSpace:
+    - X: 240
+      Y: 120
+      Width: 24
+      Height: 120
+    - X: 472
+      Y: 120
+      Width: 24
+      Height: 120
+    - X: 1088
+      Y: 136
+      Width: 40
+      Height: 80
   - Room: "b-00"
     Holes:
     - Side: Left
@@ -1480,13 +1503,13 @@ BSide:
       Idx: 0
       Kind: in
   - Room: "d-05"
+    End: true
     Holes:
     - Side: Left
       Idx: 0
       Kind: in
       ReqIn:
         Dashes: one
-    End: true
 
 CSide:
   - Room: "00"
@@ -1512,6 +1535,7 @@ CSide:
       Idx: 0
       Kind: in
   - Room: "02"
+    End: true
     Holes:
     - Side: Left
       Idx: 0
@@ -1521,4 +1545,3 @@ CSide:
         - Dashes: two
         - Dashes: one
           Difficulty: hard
-    End: true

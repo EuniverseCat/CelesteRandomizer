@@ -56,7 +56,7 @@ namespace Celeste.Mod.Randomizer {
 
                 var newPosition = toRoomStatic.AdjacentPosition(fromRoom.Bounds, fromEdge.Static.HoleTarget.Side, newOffset);
                 var toRoom = new LinkedRoom(toRoomStatic, newPosition);
-                if (!logic.Map.AreaFree(toRoom.Bounds)) {
+                if (!logic.Map.AreaFree(toRoom)) {
                     return null;
                 }
 

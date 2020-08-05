@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using MonoMod.Utils;
 
 namespace Celeste.Mod.Randomizer {
     public class StaticRoom {
@@ -10,7 +11,9 @@ namespace Celeste.Mod.Randomizer {
         public readonly bool End;
         public readonly bool Hub;
         private List<RandoConfigEdit> Tweaks;
+        private RandoConfigCoreMode CoreModes;
         public Dictionary<string, StaticNode> Nodes;
+        public List<RandoConfigRectangle> ExtraSpace;
 
         public List<Hole> Holes;
         public List<StaticCollectable> Collectables;
@@ -24,6 +27,8 @@ namespace Celeste.Mod.Randomizer {
             this.End = config.End;
             this.Hub = config.Hub;
             this.Tweaks = config.Tweaks ?? new List<RandoConfigEdit>();
+            this.CoreModes = config.Core;
+            this.ExtraSpace = config.ExtraSpace ?? new List<RandoConfigRectangle>();
 
             this.Collectables = new List<StaticCollectable>();
             foreach (var entity in Level.Entities) {
@@ -91,26 +96,26 @@ namespace Celeste.Mod.Randomizer {
 
                         var pos = edge.HoleTarget.LowCoord(this.Level.Bounds);
                         var dist = (pos - lowPos).Length();
-                        if (dist < bestDist) {
+                        if (!uhole.LowOpen && dist < bestDist) {
                             bestDist = dist;
                             bestNode = node;
                         }
 
                         dist = (pos - highPos).Length();
-                        if (dist < bestDist) {
+                        if (!uhole.HighOpen && dist < bestDist) {
                             bestDist = dist;
                             bestNode = node;
                         }
 
                         pos = edge.HoleTarget.HighCoord(this.Level.Bounds);
                         dist = (pos - lowPos).Length();
-                        if (dist < bestDist) {
+                        if (!uhole.LowOpen && dist < bestDist) {
                             bestDist = dist;
                             bestNode = node;
                         }
 
                         dist = (pos - highPos).Length();
-                        if (dist < bestDist) {
+                        if (!uhole.HighOpen && dist < bestDist) {
                             bestDist = dist;
                             bestNode = node;
                         }
@@ -190,6 +195,7 @@ namespace Celeste.Mod.Randomizer {
 
                 //Logger.Log("randomizer", $"Matching {roomConfig.Room} {holeConfig.Side} {holeConfig.Idx} to {matchedHole}");
                 matchedHole.Kind = holeConfig.Kind;
+                matchedHole.Launch = holeConfig.Launch;
                 if (holeConfig.LowBound != null) {
                     matchedHole.LowBound = (int)holeConfig.LowBound;
                 }
@@ -216,7 +222,7 @@ namespace Celeste.Mod.Randomizer {
                     toNode = this.Nodes[edge.To];
                 } else if (edge.Split != null) {
                     if (node.Edges.Count != 2) {
-                        throw new Exception($"Cannot split: must have exactly two edges ({this.Name} {node.Name})");
+                        throw new Exception($"[{this.Name}.{node.Name}] Cannot split: must have exactly two edges");
                     }
 
                     toNode = new StaticNode() {
@@ -224,7 +230,7 @@ namespace Celeste.Mod.Randomizer {
                         ParentRoom = node.ParentRoom
                     };
                     if (node.ParentRoom.Nodes.ContainsKey(toNode.Name)) {
-                        throw new Exception("You may only autosplit a room once");
+                        throw new Exception($"[{this.Name}.{node.Name}] You may only autosplit a room once");
                     }
                     node.ParentRoom.Nodes[toNode.Name] = toNode;
 
@@ -261,18 +267,18 @@ namespace Celeste.Mod.Randomizer {
                         ParentRoom = node.ParentRoom
                     };
                     if (node.ParentRoom.Nodes.ContainsKey(toNode.Name)) {
-                        throw new Exception("You may only autosplit a room once");
+                        throw new Exception($"[{this.Name}.{node.Name}] You may only autosplit a room once");
                     }
                     node.ParentRoom.Nodes[toNode.Name] = toNode;
 
                     var thing = this.Collectables[edge.Collectable.Value];
                     if (thing.ParentNode != null) {
-                        throw new Exception("Can only assign a collectable to one owner");
+                        throw new Exception($"[{this.Name}.{node.Name}] Can only assign a collectable to one owner");
                     }
                     thing.ParentNode = toNode;
                     toNode.Collectables.Add(thing); 
                 } else {
-                    throw new Exception("Internal edge must have either To or Split or Collectable");
+                    throw new Exception($"[{this.Name}.{node.Name}] Internal edge must have either To or Split or Collectable");
                 }
 
                 var reqIn = this.ProcessReqs(edge.ReqIn, null, false);
@@ -294,7 +300,7 @@ namespace Celeste.Mod.Randomizer {
                 if (col.Idx != null) {
                     var thing = this.Collectables[col.Idx.Value];
                     if (thing.ParentNode != null) {
-                        throw new Exception("Can only assign a collectable to one owner");
+                        throw new Exception($"[{this.Name}.{node.Name}] Can only assign a collectable to one owner");
                     }
                     thing.ParentNode = node;
                     thing.MustFly = col.MustFly;
@@ -306,7 +312,7 @@ namespace Celeste.Mod.Randomizer {
                         MustFly = col.MustFly
                     });
                 } else {
-                    throw new Exception("Collectable must specify Idx or X/Y");
+                    throw new Exception($"[{this.Name}.{node.Name}] Collectable must specify Idx or X/Y");
                 }
             }
         }
