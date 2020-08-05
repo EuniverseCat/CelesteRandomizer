@@ -20,6 +20,8 @@ namespace Celeste.Mod.Randomizer {
                     logic.RemainingRooms.Remove(newRoomStatic);
                 }
 
+				logic.NodePoints.Add(newRoomStatic.Level.Spawns[0] - newRoomStatic.Level.Position);
+
                 return new StartRoomReceipt {
                     Logic = logic,
                     NewRoom = newRoom,
@@ -32,6 +34,8 @@ namespace Celeste.Mod.Randomizer {
                 if (!this.Logic.Settings.RepeatRooms) {
                     this.Logic.RemainingRooms.Add(this.NewRoom.Static);
                 }
+
+				Logic.NodePoints.RemoveAt(Logic.NodePoints.Count - 1);
             }
         }
 
@@ -73,8 +77,10 @@ namespace Celeste.Mod.Randomizer {
                 if (!logic.Settings.RepeatRooms) {
                     logic.RemainingRooms.Remove(toRoomStatic);
                 }
-				
-                return new ConnectAndMapReceipt {
+
+				logic.NodePoints.Add(fromEdge.Static.HoleTarget.LowCoord(fromRoom.Bounds));
+
+				return new ConnectAndMapReceipt {
                     NewRoom = toRoom,
                     Logic = logic,
                     Edge = newEdge,
@@ -90,7 +96,9 @@ namespace Celeste.Mod.Randomizer {
                 if (!this.Logic.Settings.RepeatRooms) {
                     this.Logic.RemainingRooms.Add(this.NewRoom.Static);
                 }
-            }
+
+				Logic.NodePoints.RemoveAt(Logic.NodePoints.Count - 1);
+			}
         }
 
         public class PlaceCollectableReceipt : Receipt {

@@ -19,9 +19,9 @@ namespace Celeste.Mod.Randomizer {
                 },
             };
 
-			AreaKey key = default;
+			AreaKey areaKey = default;
 
-			RandoLogic r = new RandoLogic(settings, key);
+			RandoLogic r = new RandoLogic(settings, areaKey);
 
 			/*
             newArea.Wipe = r.PickWipe();
@@ -37,19 +37,21 @@ namespace Celeste.Mod.Randomizer {
 
 			//foreach (LinkedRoom room in r.Map.Rooms) Console.WriteLine(room.Static.Name);
 
-            return key;
+            return areaKey;
         }
 
 		public string Seed;
         private Random Random;
         private List<StaticRoom> RemainingRooms;
         private AreaKey Key;
-        private LinkedMap Map;
+        public LinkedMap Map;
         private RandoSettings Settings;
         private Capabilities Caps;
         private Deque<RandoTask> Tasks = new Deque<RandoTask>();
         private Stack<RandoTask> CompletedTasks = new Stack<RandoTask>();
         public static Dictionary<string, string> RandomDialogMappings = new Dictionary<string, string>();
+
+		public List<Vector2> NodePoints = new List<Vector2>();
 
         private RandoLogic(RandoSettings settings, AreaKey key) {
 			this.Seed = settings.Seed;

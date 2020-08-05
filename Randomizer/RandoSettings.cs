@@ -236,5 +236,23 @@ namespace Celeste.Mod.Randomizer {
                 return result;
             }
         }
+
+		public RandoSettings Clone() {
+			return new RandoSettings() {
+				SeedType = this.SeedType,
+				Seed = this.Seed,
+				Rules = this.Rules,
+				RepeatRooms = this.RepeatRooms,
+				EnterUnknown = this.EnterUnknown,
+				SpawnGolden = this.SpawnGolden,
+				Algorithm = this.Algorithm,
+				Length = this.Length,
+				Dashes = this.Dashes,
+				Difficulty = this.Difficulty,
+				Lights = this.Lights,
+				Darkness = this.Darkness,
+				IncludedMaps = this.IncludedMaps
+			};
+		}
     }
 }

@@ -3,7 +3,6 @@ using Monocle;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
@@ -21,11 +20,12 @@ namespace Bruter {
 		static Stopwatch stopwatch;
 		public int ID;
 		const int divisionSize = 50000;
+		static Random rng = new Random();
 
 		StreamWriter swShort = null;
 		StreamWriter swLong = null;
-		List<KeyValuePair<string, string>> a;
-		object outputLong = null;
+		static /*Linked*/List<MapOutput> outputShort = new List<MapOutput>();
+		static /*Linked*/List<MapOutput> outputLong = new List<MapOutput>();
 
 		delegate MapData d_MakeMap(RandoLogic self);
 		static d_MakeMap orig_MakeMap;
@@ -54,17 +54,23 @@ namespace Bruter {
 			orig_MakeMap = d_LogicMakeMap.GenerateTrampoline<d_MakeMap>();
 
 			stopwatch = Stopwatch.StartNew();
-			int threads = 1;
-			int seeds = 100;
+			int threads = 4;
+			int seeds = 2500;
+			Thread t = null;
 			for (int i = 0; i < threads; i++) {
 				Program p = new Program(i);
-				Thread t = new Thread(() => p.Brute(seeds));
+				t = new Thread(() => p.Brute(seeds));
 				pool.Add(p);
 				t.Start();
-				Thread.Sleep(1);
 			}
 
-			
+			while (t.IsAlive) 
+				Thread.Sleep(2000);
+			lock (outputLong) {
+				outputLong.Sort();
+				foreach (var o in outputLong) Console.WriteLine(o);
+			}
+
 			Console.ReadKey();
 			//d_content.Dispose();
 			//d_mapLoad.Dispose();
@@ -80,17 +86,19 @@ namespace Bruter {
 		}
 
 		void Brute(int numToTest, int divisionSize = 50000, int timeout = 300) {
-			Random rng = new Random();
 
 
 			for (int i = 0; i < numToTest; i++) {
 
 				string seed = "";
-				for (int j = 0; j < 6; j++) {
-					seed += ((char)rng.Next(32, 127)).ToString();
+				lock (rng) {
+					for (int j = 0; j < 6; j++) {
+						seed += ((char)rng.Next(32, 127)).ToString();
+					}
 				}
-				RandoModule.Instance.Settings.Seed = seed;
-				Thread randoThread = new Thread(() => RandoLogic.GenerateMap(RandoModule.Instance.Settings));
+				RandoSettings settings = RandoModule.Instance.Settings.Clone();
+				settings.Seed = seed;
+				Thread randoThread = new Thread(() => RandoLogic.GenerateMap(settings));
 				randoThread.Start();
 
 				int ms = 0;
@@ -112,9 +120,13 @@ namespace Bruter {
 
 		public static MapData OverrideMakeMap(RandoLogic self) {
 			MapData data = orig_MakeMap(self);
-			Console.WriteLine(self.Seed);
-			Console.WriteLine(data.LevelCount);
-			Console.WriteLine(data.Levels[0].Name);
+			MapOutput _out = new MapOutput(self, data);
+			lock (outputShort) {
+				outputShort.Add(_out);
+			}
+			lock (outputLong) {
+				outputLong.Add(_out);
+			}
 			return data;
 		}
 

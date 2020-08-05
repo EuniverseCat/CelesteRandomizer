@@ -57,8 +57,9 @@ namespace Celeste.Mod.Randomizer {
             }
 
             public override bool Next() {
-                var closure = LinkedNodeSet.Closure(this.Node, this.Logic.Caps, null, true);
-                var available = closure.UnlinkedEdges((UnlinkedEdge u) => !this.TriedEdges.Contains(u.Static) && this.Logic.Map.HoleFree(this.Node.Room, u.Static.HoleTarget));
+                LinkedNodeSet closure = LinkedNodeSet.Closure(this.Node, this.Logic.Caps, null, true);
+                List<UnlinkedEdge> available = closure.UnlinkedEdges((u) => 
+					!this.TriedEdges.Contains(u.Static) && this.Logic.Map.HoleFree(this.Node.Room, u.Static.HoleTarget));
                 if (available.Count == 0) {
                     return false;
                 }

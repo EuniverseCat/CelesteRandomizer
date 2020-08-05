@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Randomizer", "Randomizer\Ra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Celeste.Mod.mm", "..\Everest\Celeste.Mod.mm\Celeste.Mod.mm.csproj", "{D5D0239D-FF95-4897-9484-1898AB7E82F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "god i don't know", "god i don't know\god i don't know.csproj", "{934526E1-63C1-4C59-A9C2-F3E9512CD141}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bruter", "god i don't know\Bruter.csproj", "{934526E1-63C1-4C59-A9C2-F3E9512CD141}"
 	ProjectSection(ProjectDependencies) = postProject
 		{8CBA6958-CD94-44B4-970B-5FC3DBE6B019} = {8CBA6958-CD94-44B4-970B-5FC3DBE6B019}
 	EndProjectSection

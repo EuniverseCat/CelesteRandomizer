@@ -36,6 +36,10 @@
     <Reference Include="Celeste">
       <HintPath>..\..\..\..\Saved Games\Celestemain\Celeste.exe</HintPath>
     </Reference>
+    <Reference Include="FNA, Version=19.9.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Saved Games\Celestemain\FNA.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Cecil, Version=0.11.2.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Saved Games\Celestemain\Mono.Cecil.dll</HintPath>
@@ -69,7 +73,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Bruter.cs" />
+    <Compile Include="MapOutput.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
