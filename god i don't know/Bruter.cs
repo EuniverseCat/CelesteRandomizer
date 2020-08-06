@@ -55,7 +55,7 @@ namespace Bruter {
 
 			stopwatch = Stopwatch.StartNew();
 			int threads = 4;
-			int seeds = 2500;
+			int seeds = 10000;
 			Thread t = null;
 			for (int i = 0; i < threads; i++) {
 				Program p = new Program(i);

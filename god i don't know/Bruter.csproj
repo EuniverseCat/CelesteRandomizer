@@ -63,6 +63,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Saved Games\Celestemain\MonoMod.Utils.dll</HintPath>
     </Reference>
+    <Reference Include="Priority Queue, Version=4.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\OptimizedPriorityQueue.4.2.0\lib\net45\Priority Queue.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -76,9 +79,11 @@
     <Compile Include="Bruter.cs" />
     <Compile Include="MapOutput.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="AStar.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Randomizer\Randomizer.csproj">
