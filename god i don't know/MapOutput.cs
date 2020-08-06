@@ -15,6 +15,7 @@ namespace Bruter {
 		public MapOutput(RandoLogic logic, MapData data) {
 			seed = logic.Seed;
 			weight = CalculateWeight(logic, logic.Map);
+			info = logic.Map.Rooms[0].Static.Name;
 		}
 
 		public double CalculateWeight(RandoLogic logic, LinkedMap map) {

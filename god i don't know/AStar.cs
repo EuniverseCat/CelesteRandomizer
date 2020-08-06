@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Priority_Queue;
 
 
 //Adapted from the pseudocode on wikipedia
@@ -14,6 +14,8 @@ namespace Bruter {
 			public Node parent;
 			public int x;
 			public int y;
+
+			public List<Node> GetNeighbors() { return null; }
 		}
 
 		public object graph;
@@ -32,11 +34,11 @@ namespace Bruter {
 
 		// A* finds a path from start to goal.
 		// h is the heuristic function. h(n) estimates the cost to reach goal from node n.
-		public List<Node> A_Star(Node start, Node goal, Func<Node, float> h) {
+		List<Node> A_Star(Node start, Node goal, Func<Node, float> h) {
 			// The set of discovered nodes that may need to be (re-)expanded.
 			// Initially, only the start node is known.
 			// This is usually implemented as a min-heap or priority queue rather than a hash-set.
-			PriorityQueue openSet = new PriorityQueue();
+			SimplePriorityQueue <Node> openSet = new SimplePriorityQueue<Node>();
 
 			// For node n, gScore[n] is the cost of the cheapest path from start to n currently known.
 			start.gScore = 0;
@@ -47,7 +49,7 @@ namespace Bruter {
 
 			start.parent = start;
 
-			while (!openSet.isEmpty()) {
+			while (!(openSet.Count == 0)) {
 				// This operation can occur in O(1) time if openSet is a min-heap or a priority queue
 				Node current = openSet.Dequeue();
 
@@ -67,7 +69,7 @@ namespace Bruter {
 
 						neighbor.fScore = neighbor.gScore + h(neighbor);
 						if (!openSet.Contains(neighbor)) {
-							openSet.Enqueue(neighbor);
+							openSet.Enqueue(neighbor, neighbor.fScore);
 						}
 					}
 				}
@@ -75,8 +77,13 @@ namespace Bruter {
 			return null;
 		}
 
+		public List<Node> AStar_PostSmoothing(Node start, Node goal, Func<Node, float> h) {
+			return A_Star(start, goal, h);
+
+		}
+
 		float d(Node from, Node to) {
-			if (from.x = to.x || from.y = to.y)
+			if (from.x == to.x || from.y == to.y)
 				return 1;
 			return 1.41421f;
 		}

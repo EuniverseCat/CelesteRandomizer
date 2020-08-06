@@ -123,7 +123,7 @@ namespace Celeste.Mod.Randomizer {
             }
         }
 
-        public LevelData Bake(int? nonce, Random random) => Static.MakeLevelData(new Vector2(this.Bounds.Left, this.Bounds.Top), nonce);
+        public virtual LevelData Bake(int? nonce, Random random) => Static.MakeLevelData(new Vector2(this.Bounds.Left, this.Bounds.Top), nonce);
 
     }
 
