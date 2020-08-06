@@ -1,136 +1,188 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Monocle;
 
 namespace Celeste.Mod.Randomizer {
     public partial class RandoLogic {
 
-        private static readonly int[] LabyrinthMinimums = { 30, 50, 80, 120 };
-        private static readonly int[] LabyrinthMaximums = { 50, 80, 120, 200 };
+        private static readonly int[] LabyrinthMinimums = { 15, 25, 50, 70 };
+        private static readonly int[] LabyrinthMaximums = { 20, 40, 65, 90 };
 
-        private class TaskLabyrinthStart : RandoTask {
-            private HashSet<StaticRoom> TriedRooms = new HashSet<StaticRoom>();
+        private List<UnlinkedEdge> PossibleContinuations = new List<UnlinkedEdge>();
+        private List<UnlinkedCollectable> PossibleCollectables = new List<UnlinkedCollectable>();
+        private List<UnlinkedCollectable> PriorityCollectables = new List<UnlinkedCollectable>();
+        int StartingGemCount;
 
-            public TaskLabyrinthStart(RandoLogic logic) : base(logic) {
+        private void GenerateLabyrinth() {
+            this.Caps = this.Caps.WithoutKey();
+            this.StartingGemCount = this.Settings.Length == MapLength.Short ? 3 : 0;
+
+            void retry() {
+                this.PossibleCollectables.Clear();
+                this.PriorityCollectables.Clear();
+                this.PossibleContinuations.Clear();
+                this.ResetRooms();
+                this.Map.Clear();
             }
+            tryagain:
 
-            private IEnumerable<StaticRoom> AvailableRooms() {
-                foreach (var room in Logic.RemainingRooms) {
-                    if (room.End) {
-                        continue;
-                    }
-                    if (TriedRooms.Contains(room)) {
-                        continue;
-                    }
-                    yield return room;
+            foreach (var room in this.RemainingRooms) {
+                if (room.Name == "Celeste/6-Reflection/A/b-00") {
+                    var lroom = new LabyrinthStartRoom(room);
+                    this.Map.AddRoom(lroom);
+                    this.RemainingRooms.Remove(room);
+                    this.PossibleContinuations.AddRange(LinkedNodeSet.Closure(lroom.Nodes["main"], this.Caps, this.Caps, true).UnlinkedEdges());
+                    break;
                 }
             }
 
-            private StartRoomReceipt WorkingPossibility() {
-                var available = new List<StaticRoom>(AvailableRooms());
+            while (this.PossibleContinuations.Count != 0) {
+                //Logger.Log("DEBUG", $"status: rooms={this.Map.Count} queue={this.PossibleContinuations.Count}");
+                int idx = this.Random.Next(this.PossibleContinuations.Count);
+                var startEdge = this.PossibleContinuations[idx];
+                this.PossibleContinuations.RemoveAt(idx);
 
-                if (available.Count == 0) {
-                    return null;
-                }
-
-                var picked = available[this.Logic.Random.Next(available.Count)];
-                return StartRoomReceipt.Do(this.Logic, picked);
-            }
-
-            public override bool Next() {
-                var receipt = this.WorkingPossibility();
-                if (receipt == null) {
-                    return false;
-                }
-
-                this.TriedRooms.Add(receipt.NewRoom.Static);
-                this.AddReceipt(receipt);
-
-                this.AddLastTask(new TaskLabyrinthFinish(this.Logic));
-
-                var closure = LinkedNodeSet.Closure(receipt.NewRoom.Nodes["main"], this.Logic.Caps.WithoutKey(), this.Logic.Caps.WithoutKey(), true);
-                var node = receipt.NewRoom.Nodes["main"];
-                foreach (var edge in closure.UnlinkedEdges()) {
-                    this.AddNextTask(new TaskLabyrinthContinue(this.Logic, edge));
-                }
-                return true;
-            }
-        }
-
-        private class TaskLabyrinthContinue : RandoTask {
-            private UnlinkedEdge Edge;
-            private int Goodwill;
-
-            private HashSet<StaticEdge> TriedEdges = new HashSet<StaticEdge>();
-
-            public TaskLabyrinthContinue(RandoLogic logic, UnlinkedEdge edge, int goodwill=5) : base(logic) {
-                this.Edge = edge;
-                this.Goodwill = goodwill;
-            }
-
-            private ConnectAndMapReceipt WorkingPossibility() {
-                var possibilities = this.Logic.AvailableNewEdges(this.Logic.Caps.WithoutKey(), this.Logic.Caps.WithoutKey(), (StaticEdge edge) => !edge.FromNode.ParentRoom.End && !this.TriedEdges.Contains(edge));
-
-                foreach (var edge in possibilities) {
-                    var result = ConnectAndMapReceipt.Do(this.Logic, this.Edge, edge);
+                foreach (var toEdge in this.AvailableNewEdges(this.Caps, this.Caps, (edge) => !edge.FromNode.ParentRoom.End)) {
+                    var result = ConnectAndMapReceipt.Do(this, startEdge, toEdge);
                     if (result != null) {
-                        return result;
+                        var closure = LinkedNodeSet.Closure(result.EntryNode, this.Caps, this.Caps, true);
+                        var ue = closure.UnlinkedEdges();
+                        var uc = closure.UnlinkedCollectables();
+                        if (ue.Count == 0 && uc.Count == 0) {
+                            result.Undo();
+                            continue;
+                        } else if (ue.Count == 0) {
+                            this.PriorityCollectables.AddRange(uc);
+                        } else {
+                            this.PossibleContinuations.AddRange(ue);
+                            this.PossibleCollectables.AddRange(uc);
+                        }
+                        break;
                     }
                 }
 
-                return null;
+                if (this.Map.Count >= LabyrinthMaximums[(int)this.Settings.Length]) {
+                    break;
+                }
             }
 
-            public override bool Next() {
+            if (this.Map.Count < LabyrinthMinimums[(int)this.Settings.Length]) {
+                //Logger.Log("DEBUG", "retrying - too short");
+                retry();
+                goto tryagain;
+            }
 
-                int minCount = LabyrinthMinimums[(int)this.Logic.Settings.Length];
-                int maxCount = LabyrinthMaximums[(int)this.Logic.Settings.Length];
-                double progress = (double)(Logic.Map.Count - minCount) / (double)(maxCount - minCount);
-                if (progress > Logic.Random.NextDouble()) {
-                    this.Goodwill = 0; // if we need to backtrack go past this
-                    return true;
+            if (this.PossibleCollectables.Count + this.PriorityCollectables.Count < (6 - this.StartingGemCount)) {
+                //Logger.Log("DEBUG", "retrying - not enough spots");
+                retry();
+                goto tryagain;
+            }
+
+            for (var gem = LinkedNode.LinkedCollectable.Gem1 + this.StartingGemCount; gem <= LinkedNode.LinkedCollectable.Gem6; gem++) {
+                var collection = this.PriorityCollectables.Count != 0 ? this.PriorityCollectables : this.PossibleCollectables;
+                if (collection.Count == 0) {  // just in case
+                    retry();
+                    goto tryagain;
                 }
+                var idx = this.Random.Next(collection.Count);
+                var spot = collection[idx];
+                collection.RemoveAt(idx);
 
-                if (this.Goodwill <= 0) {
-                    return false;
-                }
-
-                var receipt = this.WorkingPossibility();
-                if (receipt == null) {
-                    this.Goodwill = 0; // if we need to backtrack go past this
-                    return true; // never fail!
-                }
-
-                this.AddReceipt(receipt);
-                this.TriedEdges.Add(receipt.Edge.CorrespondingEdge(this.Edge.Node));
-                var targetNode = receipt.Edge.OtherNode(this.Edge.Node);
-                var closure = LinkedNodeSet.Closure(targetNode, this.Logic.Caps.WithoutKey(), this.Logic.Caps.WithoutKey(), true);
-
-                var any = false;
-                foreach (var newedge in closure.UnlinkedEdges()) {
-                    any = true;
-                    this.AddNextTask(new TaskLabyrinthContinue(this.Logic, newedge, Math.Min(5, this.Goodwill + 1)));
-                }
-                if (!any) {
-                    this.Goodwill = 0;
+                if (spot.Static.MustFly) {
+                    spot.Node.Collectables[spot.Static] = LinkedNode.LinkedCollectable.WingedStrawberry;
+                    gem--;
                 } else {
-                    this.Goodwill--;
+                    spot.Node.Collectables[spot.Static] = gem;
                 }
-                return true;
+            }
+
+            while (this.PriorityCollectables.Count != 0) {
+                var spot = this.PriorityCollectables[this.PriorityCollectables.Count - 1];
+                this.PriorityCollectables.RemoveAt(this.PriorityCollectables.Count - 1);
+
+                spot.Node.Collectables[spot.Static] = spot.Static.MustFly ? LinkedNode.LinkedCollectable.WingedStrawberry : LinkedNode.LinkedCollectable.Strawberry;
+            }
+
+            var targetCount = this.PossibleCollectables.Count / 3 * 2;
+            this.PossibleCollectables.Shuffle(this.Random);
+            while (this.PossibleCollectables.Count > targetCount) {
+                var spot = this.PossibleCollectables[this.PossibleCollectables.Count - 1];
+                this.PossibleCollectables.RemoveAt(this.PossibleCollectables.Count - 1);
+
+                spot.Node.Collectables[spot.Static] = spot.Static.MustFly ? LinkedNode.LinkedCollectable.WingedStrawberry : LinkedNode.LinkedCollectable.Strawberry;
             }
         }
 
-        private class TaskLabyrinthFinish : RandoTask {
+        private class LabyrinthStartRoom : LinkedRoom {
+            public LabyrinthStartRoom(StaticRoom room) : base(room, Vector2.Zero) { }
 
-            public TaskLabyrinthFinish(RandoLogic logic) : base(logic) {
-            }
-
-            public override bool Next() {
-                int minCount = LabyrinthMinimums[(int)this.Logic.Settings.Length];
-                if (Logic.Map.Count < minCount) {
-                    return false;
+            public override LevelData Bake(int? nonce, Random random) {
+                var result = base.Bake(nonce, random);
+	
+                int maxID = 0;
+                EntityData granny = null;
+                foreach (var e in result.Entities) {
+                    maxID = Math.Max(maxID, e.ID);
+                    if (e.Name == "npc") {
+                        granny = e;
+                    }
                 }
-                return true;
+                result.Entities.Remove(granny);
+
+                result.Spawns.Insert(0, new Vector2(336, 144));
+
+                result.Entities.Add(new EntityData {
+                    Name = "summitGemManager",
+                    ID = ++maxID,
+                    Level = result,
+                    Position = new Vector2(384, 136),
+                    Nodes = new Vector2[] {
+                        new Vector2(330,    168),
+                        new Vector2(346+4,  156),
+                        new Vector2(362+8,  168),
+                        new Vector2(378+12, 156),
+                        new Vector2(394+16, 168),
+                        new Vector2(410+20, 156)
+                    }
+                });
+
+                result.Entities.Add(new EntityData {
+                    Name = "invisibleBarrier",
+                    ID = ++maxID,
+                    Level = result,
+                    Position = new Vector2(392, 32),
+                    Width = 48,
+                    Height = 32
+                });
+
+                result.Entities.Add(new EntityData {
+                    Name = "blackGem",
+                    ID = ++maxID,
+                    Level = result,
+                    Position = new Vector2(416, 48),
+                });
+
+                foreach (var pos in new Vector2[] {
+                    new Vector2(400, 56),
+                    new Vector2(408, 64),
+                    new Vector2(416, 72),
+                    new Vector2(424, 64),
+                    new Vector2(432, 64),
+                    new Vector2(440, 56),
+                    new Vector2(440, 48),
+                    new Vector2(432, 40),
+                    new Vector2(432, 32),
+                }) {
+                    result.Entities.Add(new EntityData {
+                        Name = "spinner",
+                        ID = ++maxID,
+                        Level = result,
+                        Position = pos
+                    });
+                }
+
+                return result;
             }
         }
     }

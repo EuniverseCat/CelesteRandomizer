@@ -4,6 +4,32 @@ using Monocle;
 
 namespace Celeste.Mod.Randomizer {
     public partial class RandoLogic {
+        private Deque<RandoTask> Tasks = new Deque<RandoTask>();
+        private Stack<RandoTask> CompletedTasks = new Stack<RandoTask>();
+
+        private static readonly float[] PathwayMinimums = { 20, 40, 60, 90 };
+        private static readonly float[] PathwayRanges = { 7, 15, 15, 40 };
+        private static readonly float[] PathwayMaxRoom = { 5, 20, 10000, 10000 };
+
+        private void GeneratePathway() {
+            this.Tasks.AddToFront(new TaskPathwayStart(this));
+
+            while (this.Tasks.Count != 0) {
+                var nextTask = this.Tasks.RemoveFromFront();
+
+                while (!nextTask.Next()) {
+                    if (this.CompletedTasks.Count == 0) {
+                        throw new Exception("Could not generate map");
+                    }
+
+                    this.Tasks.AddToFront(nextTask);
+                    nextTask = this.CompletedTasks.Pop();
+                    nextTask.Undo();
+                }
+
+                this.CompletedTasks.Push(nextTask);
+            }
+        }
         private class TaskPathwayStart : RandoTask {
             private HashSet<StaticRoom> TriedRooms = new HashSet<StaticRoom>();
 
@@ -13,6 +39,9 @@ namespace Celeste.Mod.Randomizer {
             private IEnumerable<StaticRoom> AvailableRooms() {
                 foreach (var room in Logic.RemainingRooms) {
                     if (TriedRooms.Contains(room)) {
+                        continue;
+                    }
+                    if (room.Worth > PathwayMaxRoom[(int)Logic.Settings.Length]) {
                         continue;
                     }
                     if (room.End) {
@@ -86,19 +115,19 @@ namespace Celeste.Mod.Randomizer {
             private HashSet<StaticRoom> TriedRooms = new HashSet<StaticRoom>();
             private bool IsEnd;
 
-            private static readonly int[] Minimums = { 15, 30, 50, 80 };
-            private static readonly int[] Ranges = { 15, 30, 30, 70 };
-
             public TaskPathwayPickRoom(RandoLogic Logic, UnlinkedEdge edge) : base(Logic) {
                 this.Edge = edge;
 
-                double progress = (double)(Logic.Map.Count - Minimums[(int)Logic.Settings.Length]) / (double)Ranges[(int)Logic.Settings.Length];
-                this.IsEnd = progress > Math.Sqrt(Logic.Random.NextDouble());
+                float progress = (Logic.Map.Worth - PathwayMinimums[(int)Logic.Settings.Length]) / PathwayRanges[(int)Logic.Settings.Length];
+                this.IsEnd = progress > Math.Sqrt(Logic.Random.NextFloat());
             }
 
             private ConnectAndMapReceipt WorkingPossibility() {
                 var caps = this.Logic.Caps.WithoutKey(); // don't try to enter a door locked from the other side
-                var possibilities = this.Logic.AvailableNewEdges(caps, null, (StaticEdge e) => !this.TriedRooms.Contains(e.FromNode.ParentRoom) && this.IsEnd == e.FromNode.ParentRoom.End);
+                var possibilities = this.Logic.AvailableNewEdges(caps, null, (StaticEdge e) => 
+                    !this.TriedRooms.Contains(e.FromNode.ParentRoom) && 
+                    this.IsEnd == e.FromNode.ParentRoom.End && 
+                    e.FromNode.ParentRoom.Worth <= PathwayMaxRoom[(int)Logic.Settings.Length]);
 
                 foreach (var edge in possibilities) {
                     var result = ConnectAndMapReceipt.Do(this.Logic, this.Edge, edge);

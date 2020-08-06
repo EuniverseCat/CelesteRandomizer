@@ -43,29 +43,31 @@ namespace Celeste.Mod.Randomizer {
 
 		public string Seed;
         private Random Random;
-        private List<StaticRoom> RemainingRooms;
+        private List<StaticRoom> RemainingRooms = new List<StaticRoom>();
         private AreaKey Key;
         public LinkedMap Map;
         private RandoSettings Settings;
         private Capabilities Caps;
-        private Deque<RandoTask> Tasks = new Deque<RandoTask>();
-        private Stack<RandoTask> CompletedTasks = new Stack<RandoTask>();
         public static Dictionary<string, string> RandomDialogMappings = new Dictionary<string, string>();
 
 		public List<Vector2> NodePoints = new List<Vector2>();
+
+
+        private void ResetRooms() {
+            this.RemainingRooms.Clear();
+            foreach (var room in RandoLogic.AllRooms) {
+                if (this.Settings.MapIncluded(room.Area)) {
+                    this.RemainingRooms.Add(room);
+                }
+            }
+        }
 
         private RandoLogic(RandoSettings settings, AreaKey key) {
 			this.Seed = settings.Seed;
             this.Random = new Random((int)settings.IntSeed);
             this.Settings = settings;
-            this.RemainingRooms = new List<StaticRoom>();
-            foreach (StaticRoom room in AllRooms) {
-                if (settings.MapIncluded(room.Area)) {
-                    this.RemainingRooms.Add(room);
-                }
-            }
             this.Key = key;
-
+            this.ResetRooms();
             this.Caps = new Capabilities {
                 Dashes = settings.Dashes,
                 PlayerSkill = settings.Difficulty,
@@ -290,31 +292,13 @@ namespace Celeste.Mod.Randomizer {
 
 		public MapData MakeMap() {
             this.Map = new LinkedMap();
-
             switch (this.Settings.Algorithm) {
                 case LogicType.Labyrinth:
-                default:
-                    this.Tasks.AddToFront(new TaskLabyrinthStart(this));
+                    this.GenerateLabyrinth();
                     break;
                 case LogicType.Pathway:
-                    this.Tasks.AddToFront(new TaskPathwayStart(this));
+                    this.GeneratePathway();
                     break;
-            }
-
-            while (this.Tasks.Count != 0) {
-                RandoTask nextTask = this.Tasks.RemoveFromFront();
-
-                while (!nextTask.Next()) {
-                    if (this.CompletedTasks.Count == 0) {
-                        throw new Exception("Could not generate map");
-                    }
-
-                    Tasks.AddToFront(nextTask);
-                    nextTask = this.CompletedTasks.Pop();
-                    nextTask.Undo();
-                }
-
-               CompletedTasks.Push(nextTask);
             }
 
             MapData map = new MapData(this.Key);

@@ -9,6 +9,7 @@ namespace Celeste.Mod.Randomizer {
         public List<LinkedRoom> Rooms = new List<LinkedRoom>();
         private LinkedRoom CachedHit;
         private int nonce;
+        public float Worth { get; private set; }
 
         public bool AreaFree(Rectangle rect) {
             if (this.CachedHit != null) {
@@ -72,10 +73,12 @@ namespace Celeste.Mod.Randomizer {
 
         public void AddRoom(LinkedRoom room) {
             this.Rooms.Add(room);
+            this.Worth += room.Static.Worth;
         }
 
         public void RemoveRoom(LinkedRoom room) {
             this.Rooms.Remove(room);
+            this.Worth -= room.Static.Worth;
             if (room == this.CachedHit) {
                 this.CachedHit = null;
             }
@@ -91,6 +94,12 @@ namespace Celeste.Mod.Randomizer {
             get {
                 return this.Rooms.Count;
             }
+        }
+
+        public void Clear() {
+            this.Rooms.Clear();
+            this.CachedHit = null;
+            this.nonce = 0;
         }
     }
 
@@ -138,7 +147,13 @@ namespace Celeste.Mod.Randomizer {
         public enum LinkedCollectable {
             Strawberry,
             WingedStrawberry,
-            Key
+            Key,
+            Gem1,
+            Gem2,
+            Gem3,
+            Gem4,
+            Gem5,
+            Gem6,
         }
 
         public IEnumerable<LinkedNode> Successors(Capabilities capsForward, Capabilities capsReverse, bool onlyInternal = false) {
