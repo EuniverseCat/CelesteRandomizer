@@ -14,6 +14,7 @@ namespace Celeste.Mod.Randomizer {
 
         public RandoSettings Settings;
         public const int MAX_SEED_CHARS = 20;
+        public bool SeedCleanRandom;
 
 		public RandoModule() {
 			Instance = this;

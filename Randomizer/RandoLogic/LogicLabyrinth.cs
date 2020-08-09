@@ -27,7 +27,7 @@ namespace Celeste.Mod.Randomizer {
             }
             tryagain:
 
-            foreach (var room in this.RemainingRooms) {
+            foreach (var room in RandoLogic.AllRooms) {
                 if (room.Name == "Celeste/6-Reflection/A/b-00") {
                     var lroom = new LabyrinthStartRoom(room);
                     this.Map.AddRoom(lroom);
@@ -43,7 +43,8 @@ namespace Celeste.Mod.Randomizer {
                 var startEdge = this.PossibleContinuations[idx];
                 this.PossibleContinuations.RemoveAt(idx);
 
-                foreach (var toEdge in this.AvailableNewEdges(this.Caps, this.Caps, (edge) => !edge.FromNode.ParentRoom.End)) {
+                foreach (var toEdge in this.AvailableNewEdges(this.Caps, this.Caps,
+                        (edge) => !edge.FromNode.ParentRoom.End && edge.FromNode.ParentRoom.Name != "Celeste/7-Summit/A/g-00b")) {
                     var result = ConnectAndMapReceipt.Do(this, startEdge, toEdge);
                     if (result != null) {
                         var closure = LinkedNodeSet.Closure(result.EntryNode, this.Caps, this.Caps, true);
@@ -64,6 +65,36 @@ namespace Celeste.Mod.Randomizer {
 
                 if (this.Map.Count >= LabyrinthMaximums[(int)this.Settings.Length]) {
                     break;
+                }
+            }
+
+            while (this.PossibleContinuations.Count != 0) {
+                var startEdge = this.PossibleContinuations[this.PossibleContinuations.Count - 1];
+                this.PossibleContinuations.RemoveAt(this.PossibleContinuations.Count - 1);
+
+                var closure = LinkedNodeSet.Closure(startEdge.Node, this.Caps, this.Caps, true);
+                var uc = closure.UnlinkedCollectables();
+                if (uc.Count == 0) {
+                    var edgeCount = 0;
+                    foreach (var node in startEdge.Node.Room.Nodes.Values) {
+                        edgeCount += node.Edges.Count;
+                    }
+                    if (edgeCount <= 1) {
+                        foreach (var node in startEdge.Node.Room.Nodes.Values) {
+                            foreach (var edge in node.Edges) {
+                                var otherNode = edge.OtherNode(node);
+                                var otherEdge = edge.OtherEdge(node);
+                                otherNode.Edges.Remove(edge);
+                                this.PossibleContinuations.Add(new UnlinkedEdge() { Static = otherEdge, Node = otherNode });
+                            }
+                        }
+                        this.Map.RemoveRoom(startEdge.Node.Room);
+                    }
+                } else {
+                    this.PriorityCollectables.AddRange(uc);
+                    foreach (var c in uc) {
+                        this.PossibleCollectables.Remove(c);
+                    }
                 }
             }
 
@@ -94,6 +125,16 @@ namespace Celeste.Mod.Randomizer {
                     gem--;
                 } else {
                     spot.Node.Collectables[spot.Static] = gem;
+                    //Logger.Log("DEBUG", $"Adding gem to {spot.Node.Room.Static.Name}");
+
+                    if (collection == this.PriorityCollectables) {
+                        for (int i = 0; i < collection.Count; i++) {
+                            if (collection[i].Node.Room == spot.Node.Room) {
+                                collection.RemoveAt(i);
+                                i--;
+                            }
+                        }
+                    }
                 }
             }
 
