@@ -15,6 +15,7 @@ namespace Celeste.Mod.Randomizer {
         C,
         D,
         E,
+        F,
         Last
     }
 
@@ -145,10 +146,22 @@ namespace Celeste.Mod.Randomizer {
                     this.Lights = ShineLights.Hubs;
                     this.Darkness = Darkness.Never;
                     break;
+                case Ruleset.F:
+                    this.SetNormalMaps();
+                    this.RepeatRooms = false;
+                    this.EnterUnknown = false;
+                    this.Algorithm = LogicType.Labyrinth;
+                    this.Length = MapLength.Medium;
+                    this.Dashes = NumDashes.Two;
+                    this.Difficulty = Difficulty.Hard;
+                    this.Lights = ShineLights.Hubs;
+                    this.Darkness = Darkness.Never;
+                    break;
             }
         }
 
         public void SetNormalMaps() {
+            this.DisableAllMaps();
             foreach (var key in RandoLogic.AvailableAreas) {
                     this.EnableMap(key);
             }
@@ -194,15 +207,16 @@ namespace Celeste.Mod.Randomizer {
         public int LevelCount {
             get {
                 int sum = 0;
-                foreach (var key in this.IncludedMaps) {
-                    var map = AreaData.GetMode(key.Stupid);
-                    sum += map.MapData.LevelCount;
+                foreach (var room in RandoLogic.AllRooms) {
+                    if (this.MapIncluded(room.Area)) {
+                        sum++;
+                    }
                 }
                 return sum;
             }
         }
 
-        private struct AreaKeyNotStupid {
+        public struct AreaKeyNotStupid {
             public int ID;
             public AreaMode Mode;
 

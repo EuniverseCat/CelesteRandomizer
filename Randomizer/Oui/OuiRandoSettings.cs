@@ -30,7 +30,13 @@ namespace Celeste.Mod.Randomizer {
 						catch (Exception e) {
                             return;
                         }
-
+                        this.entering = true;
+                        RandoModule.StartMe = newArea;
+                        while (RandoModule.StartMe != null) {
+                            Thread.Sleep(1);
+                        }
+                        this.builderThread = null;
+                        this.entering = false;
                     });
                     builderThread.Start();
                 }

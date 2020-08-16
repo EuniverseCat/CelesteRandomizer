@@ -31,7 +31,7 @@ namespace Celeste.Mod.Randomizer {
             newArea.Mode[0].AudioState = new AudioState(r.PickMusicAudio(), r.PickAmbienceAudio());
 			*/
 			r.Toss(4);
-			
+
             newArea.Mode[0].MapData = r.MakeMap();
 
 			//r.RandomizeDialog();
@@ -373,6 +373,16 @@ namespace Celeste.Mod.Randomizer {
                     Name = fgName,
                     Attributes = new Dictionary<string, object> {
                         {"only", string.Join(",", this.FindWindyLevels(map))}
+                    }
+                });
+            }
+            // this cutscene hardcodes a reference to a windsnow fg
+            // the level should only ever be last on the list, right?
+            if (fgName != "windsnow" && map.Levels[map.Levels.Count - 1].Name.StartsWith("Celeste/4-GoldenRidge/A/d-10")) {
+                map.Foreground.Children.Add(new BinaryPacker.Element {
+                    Name = "windsnow",
+                    Attributes = new Dictionary<string, object> {
+                       {"only", map.Levels[map.Levels.Count - 1].Name }
                     }
                 });
             }

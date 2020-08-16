@@ -70,14 +70,30 @@
       <HintPath>..\..\..\..\Saved Games\Celestemain\MonoMod.Utils.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Celeste.Mod.mm">
+      <HintPath>..\packages\Celeste.Mod.mm.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BingoUI">
+      <HintPath>..\packages\BingoUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="RandoModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="OuiRandoSettings.cs" />
     <Compile Include="DeepCopy.cs" />
     <Compile Include="RandoConfigFile.cs" />
     <Compile Include="RandoSettings.cs" />
+    <Compile Include="Deque.cs" />
+    <Compile Include="PriorityQueue.cs" />
+    <Compile Include="RandoModuleSettings.cs" />
+    <Compile Include="Oui/OuiRandoSettings.cs" />
+    <Compile Include="Oui/OuiMapPicker.cs" />
+    <Compile Include="Oui/OuiRandoRecords.cs" />
+    <Compile Include="RandoLogic\LogicPathway.cs" />
+    <Compile Include="RandoLogic\LinkedRoom.cs" />
+    <Compile Include="RandoLogic\Receipt.cs" />
     <Compile Include="RandoLogic\RandoLogic.cs" />
     <Compile Include="RandoLogic\ProcessAreas.cs" />
     <Compile Include="RandoLogic\Hole.cs" />
@@ -86,11 +102,12 @@
     <Compile Include="RandoLogic\RandoTask.cs" />
     <Compile Include="RandoLogic\LogicLabyrinth.cs" />
     <Compile Include="Deque.cs" />
-    <Compile Include="RandoLogic\LogicPathway.cs" />
-    <Compile Include="RandoLogic\LinkedRoom.cs" />
-    <Compile Include="RandoLogic\Receipt.cs" />
     <Compile Include="PriorityQueue.cs" />
     <Compile Include="RandoLogic\Requirements.cs" />
+    <Compile Include="Patches/qol.cs" />
+    <Compile Include="Patches/sessionLifecycle.cs" />
+    <Compile Include="Patches/mechanics.cs" />
+    <Compile Include="Patches/menuLifecycle.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="everest.yaml">

@@ -45,7 +45,7 @@ namespace Celeste.Mod.Randomizer {
             public LinkedEdge Edge;
             public LinkedNode EntryNode;
 
-            public static ConnectAndMapReceipt Do(RandoLogic logic, UnlinkedEdge fromEdge, StaticEdge toEdge) {
+            public static ConnectAndMapReceipt Do(RandoLogic logic, UnlinkedEdge fromEdge, StaticEdge toEdge, bool isBacktrack=false) {
                 var toRoomStatic = toEdge.FromNode.ParentRoom;
                 var fromRoom = fromEdge.Node.Room;
 
@@ -64,6 +64,7 @@ namespace Celeste.Mod.Randomizer {
                     return null;
                 }
 
+                toRoom.IsBacktrack = isBacktrack;
                 logic.Map.AddRoom(toRoom);
                 var newEdge = new LinkedEdge {
                     NodeA = fromEdge.Node,

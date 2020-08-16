@@ -74,11 +74,17 @@ namespace Celeste.Mod.Randomizer {
         public void AddRoom(LinkedRoom room) {
             this.Rooms.Add(room);
             this.Worth += room.Static.Worth;
+            if (room.IsBacktrack) {
+                this.Worth += room.Static.Worth;
+            }
         }
 
         public void RemoveRoom(LinkedRoom room) {
             this.Rooms.Remove(room);
             this.Worth -= room.Static.Worth;
+            if (room.IsBacktrack) {
+                this.Worth -= room.Static.Worth;
+            }
             if (room == this.CachedHit) {
                 this.CachedHit = null;
             }
@@ -109,6 +115,7 @@ namespace Celeste.Mod.Randomizer {
         public StaticRoom Static;
         public Dictionary<string, LinkedNode> Nodes = new Dictionary<string, LinkedNode>();
         public HashSet<int> UsedKeyholes = new HashSet<int>();
+        public bool IsBacktrack;
 
         public LinkedRoom(StaticRoom Room, Vector2 Position) {
             this.Static = Room;
@@ -124,7 +131,6 @@ namespace Celeste.Mod.Randomizer {
         }
 
         public virtual LevelData Bake(int? nonce, Random random) => Static.MakeLevelData(new Vector2(this.Bounds.Left, this.Bounds.Top), nonce);
-
     }
 
     public class LinkedNode : IComparable<LinkedNode>, IComparable {
@@ -279,6 +285,10 @@ namespace Celeste.Mod.Randomizer {
             }
             return this.Static == col.Static && this.Node == col.Node;
         }
+
+        public override int GetHashCode() {
+            return 8765 ^ this.Static.GetHashCode() ^ this.Node.GetHashCode();
+        }
     }
 
     public class LinkedNodeSet {
@@ -287,22 +297,22 @@ namespace Celeste.Mod.Randomizer {
         private Capabilities CapsReverse;
         private Random Random;
 
-        public static LinkedNodeSet Closure(LinkedNode start, Capabilities capsForward, Capabilities capsReverse, bool internalOnly) {
+        public static LinkedNodeSet Closure(LinkedNode start, Capabilities capsForward, Capabilities capsReverse, bool internalOnly, int maxDistance=9999) {
             var result = new HashSet<LinkedNode>();
-            var queue = new Queue<LinkedNode>();
-            void enqueue(LinkedNode node) {
-                if (!result.Contains(node)) {
-                    queue.Enqueue(node);
+            var queue = new Queue<Tuple<LinkedNode, int>>();
+            void enqueue(LinkedNode node, int remaining) {
+                if (remaining > 0 && !result.Contains(node)) {
+                    queue.Enqueue(Tuple.Create(node, remaining));
                     result.Add(node);
                 }
             }
-            enqueue(start);
+            enqueue(start, maxDistance);
 
             while (queue.Count != 0) {
                 var item = queue.Dequeue();
 
-                foreach (var succ in item.Successors(capsForward, capsReverse, internalOnly)) {
-                    enqueue(succ);
+                foreach (var succ in item.Item1.Successors(capsForward, capsReverse, internalOnly)) {
+                    enqueue(succ, item.Item2 - 1);
                 }
             }
 

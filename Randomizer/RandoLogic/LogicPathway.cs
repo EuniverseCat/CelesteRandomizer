@@ -9,7 +9,7 @@ namespace Celeste.Mod.Randomizer {
 
         private static readonly float[] PathwayMinimums = { 40, 80, 120, 180 };
         private static readonly float[] PathwayRanges = { 15, 30, 40, 80 };
-        private static readonly float[] PathwayMaxRoom = { 6, 20, 10000, 10000 };
+        private static readonly float[] PathwayMaxRoom = { 6, 15, 10000, 10000, 10000 };
 
         private void GeneratePathway() {
             this.Tasks.AddToFront(new TaskPathwayStart(this));
@@ -127,7 +127,7 @@ namespace Celeste.Mod.Randomizer {
                 var possibilities = this.Logic.AvailableNewEdges(caps, null, (StaticEdge e) => 
                     !this.TriedRooms.Contains(e.FromNode.ParentRoom) && 
                     this.IsEnd == e.FromNode.ParentRoom.End && 
-                    e.FromNode.ParentRoom.Worth <= PathwayMaxRoom[(int)Logic.Settings.Length]);
+                    e.FromNode.ParentRoom.Worth <= PathwayMaxRoom[(int)Logic.Settings.Length + (this.IsEnd ? 1 : 0)]);
 
                 foreach (var edge in possibilities) {
                     var result = ConnectAndMapReceipt.Do(this.Logic, this.Edge, edge);
@@ -194,13 +194,21 @@ namespace Celeste.Mod.Randomizer {
                 this.Tries++;
 
                 var caps = this.Logic.Caps.WithoutKey();
-                var closure = LinkedNodeSet.Closure(this.Node, caps, caps, this.InternalOnly);
+                int maxSteps = 99999;
+                if (!InternalOnly) {
+                    maxSteps = this.Logic.Random.Next(6, 20);
+                }
+                var closure = LinkedNodeSet.Closure(this.Node, caps, caps, this.InternalOnly, maxSteps);
                 closure.Shuffle(this.Logic.Random);
 
                 if (!extendingMap) {
                     // just try to place a key
                     foreach (var spot in closure.UnlinkedCollectables()) {
                         if (spot.Static.MustFly) {
+                            continue;
+                        }
+                        if (spot.Node.Room == this.Node.Room) {
+                            // don't be boring!
                             continue;
                         }
                         this.AddReceipt(PlaceCollectableReceipt.Do(spot.Node, spot.Static, LinkedNode.LinkedCollectable.Key));
@@ -215,7 +223,7 @@ namespace Celeste.Mod.Randomizer {
                         continue;
                     }
                     foreach (var toEdge in this.Logic.AvailableNewEdges(caps, caps, (StaticEdge e) => !e.FromNode.ParentRoom.End)) {
-                        var mapped = ConnectAndMapReceipt.Do(this.Logic, outEdge, toEdge);
+                        var mapped = ConnectAndMapReceipt.Do(this.Logic, outEdge, toEdge, isBacktrack: true);
                         if (mapped == null) {
                             continue;
                         }
