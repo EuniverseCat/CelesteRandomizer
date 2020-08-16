@@ -29,12 +29,11 @@ namespace Celeste.Mod.Randomizer {
             newArea.CompleteScreenName = r.PickCompleteScreen();
             newArea.CassetteSong = r.PickCassetteAudio();
             newArea.Mode[0].AudioState = new AudioState(r.PickMusicAudio(), r.PickAmbienceAudio());
+			r.RandomizeDialog();
 			*/
-			r.Toss(4);
+			r.Toss(5);
 
             newArea.Mode[0].MapData = r.MakeMap();
-
-			//r.RandomizeDialog();
 
 			//foreach (LinkedRoom room in r.Map.Rooms) Console.WriteLine(room.Static.Name);
 
@@ -51,6 +50,8 @@ namespace Celeste.Mod.Randomizer {
         public static Dictionary<string, string> RandomDialogMappings = new Dictionary<string, string>();
 
 		public List<Vector2> NodePoints = new List<Vector2>();
+		public bool broken;
+		public int horizChain;
 
 
         private void ResetRooms() {

@@ -55,7 +55,7 @@ namespace Bruter {
 
 			stopwatch = Stopwatch.StartNew();
 			int threads = 4;
-			int seeds = 10000;
+			int seeds = 1000;
 			Thread t = null;
 			for (int i = 0; i < threads; i++) {
 				Program p = new Program(i);
@@ -90,12 +90,15 @@ namespace Bruter {
 
 			for (int i = 0; i < numToTest; i++) {
 
+				genseed:
 				string seed = "";
 				lock (rng) {
 					for (int j = 0; j < 6; j++) {
 						seed += ((char)rng.Next(32, 127)).ToString();
 					}
 				}
+				if (!MapOutput.InitialCheck(seed))
+					goto genseed;
 				RandoSettings settings = RandoModule.Instance.Settings.Clone();
 				settings.Seed = seed;
 				Thread randoThread = new Thread(() => RandoLogic.GenerateMap(settings));

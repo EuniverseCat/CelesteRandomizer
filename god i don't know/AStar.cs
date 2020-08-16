@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Celeste;
 using Priority_Queue;
 
 
@@ -14,20 +15,16 @@ namespace Bruter {
 			public Node parent;
 			public int x;
 			public int y;
-
-			public List<Node> GetNeighbors() { return null; }
 		}
 
-		public object graph;
+		public LevelData level;
+		public Node[][] graph;
 
-		List<Node> reconstruct_path(Node current) {
-			List<Node> path = new List<Node>();
-			path.Add(current);
-			while (current.parent != current) {
-				current = current.parent;
-				path.Add(current);
-			}
-			return path;
+		public static string Do(LevelData level) {
+			return null;
+		}
+
+		AStar(LevelData level) {
 		}
 
 
@@ -57,7 +54,7 @@ namespace Bruter {
 					return reconstruct_path(current);
 
 
-				foreach (Node neighbor in current.GetNeighbors()) {
+				foreach (Node neighbor in GetNeighbors(current)) {
 					// d(current,neighbor) is the weight of the edge from current to neighbor
 					// tentative_gScore is the distance from start to the neighbor through current
 					float tentative_gScore = current.gScore + d(current, neighbor);
@@ -77,7 +74,17 @@ namespace Bruter {
 			return null;
 		}
 
-		public List<Node> AStar_PostSmoothing(Node start, Node goal, Func<Node, float> h) {
+		List<Node> reconstruct_path(Node current) {
+			List<Node> path = new List<Node>();
+			path.Add(current);
+			while (current.parent != current) {
+				current = current.parent;
+				path.Add(current);
+			}
+			return path;
+		}
+
+		List<Node> AStar_PostSmoothing(Node start, Node goal, Func<Node, float> h) {
 			return A_Star(start, goal, h);
 
 		}
@@ -86,6 +93,21 @@ namespace Bruter {
 			if (from.x == to.x || from.y == to.y)
 				return 1;
 			return 1.41421f;
+		}
+
+		public List<Node> GetNeighbors(Node node) {
+			List<Node> nodes = new List<Node>();
+
+			if (node.x != 0 && node.y != 0)
+				nodes.Add(graph[node.x - 1][node.y - 1]);
+			if (node.x < graph.Length && node.y != 0)
+				nodes.Add(graph[node.x + 1][node.y - 1]);
+			if (node.x != 0 && node.y < graph[0].Length)
+				nodes.Add(graph[node.x - 1][node.y + 1]);
+			if (node.x < graph.Length && node.y < graph[0].Length)
+				nodes.Add(graph[node.x + 1][node.y + 1]);
+
+			return nodes;
 		}
 	}
 }

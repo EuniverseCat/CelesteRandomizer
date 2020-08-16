@@ -79,7 +79,12 @@ namespace Celeste.Mod.Randomizer {
                     logic.RemainingRooms.Remove(toRoomStatic);
                 }
 
+				//custom tracking
 				logic.NodePoints.Add(fromEdge.Static.HoleTarget.LowCoord(fromRoom.Bounds));
+				if (!logic.broken && toEdge.HoleTarget.AlongDir == ScreenDirection.Left)
+					logic.horizChain++;
+				else
+					logic.broken = true;
 
 				return new ConnectAndMapReceipt {
                     NewRoom = toRoom,

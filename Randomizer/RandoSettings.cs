@@ -204,6 +204,8 @@ namespace Celeste.Mod.Randomizer {
             }
         }
 
+
+
         public int LevelCount {
             get {
                 int sum = 0;
