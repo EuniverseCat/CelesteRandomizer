@@ -80,6 +80,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RandoLogic\Addons.cs" />
     <Compile Include="RandoModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DeepCopy.cs" />

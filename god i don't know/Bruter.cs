@@ -16,11 +16,17 @@ using Celeste.Mod;
 namespace Bruter {
 
 	class Program {
+		static int threads = 4;
+		static int seeds = 100000;
+
+
+
 		public static List<Program> pool = new List<Program>();
 		static Stopwatch stopwatch;
 		public int ID;
 		const int divisionSize = 50000;
 		static Random rng = new Random();
+		bool done;
 
 		StreamWriter swShort = null;
 		StreamWriter swLong = null;
@@ -54,8 +60,6 @@ namespace Bruter {
 			orig_MakeMap = d_LogicMakeMap.GenerateTrampoline<d_MakeMap>();
 
 			stopwatch = Stopwatch.StartNew();
-			int threads = 4;
-			int seeds = 1000;
 			Thread t = null;
 			for (int i = 0; i < threads; i++) {
 				Program p = new Program(i);
@@ -63,9 +67,16 @@ namespace Bruter {
 				pool.Add(p);
 				t.Start();
 			}
-
-			while (t.IsAlive) 
-				Thread.Sleep(2000);
+			bool done = false;
+			while (!done) {
+				foreach (Program p in pool) {
+					if (!p.done) {
+						Thread.Sleep(2000);
+						break;
+					}
+					done = true;
+				}
+			}
 			lock (outputLong) {
 				outputLong.Sort();
 				foreach (var o in outputLong) Console.WriteLine(o);
@@ -117,7 +128,7 @@ namespace Bruter {
 
 
 
-
+			done = true;
 			Console.WriteLine($"{numToTest} seeds generated in {stopwatch.Elapsed}");
 		}
 

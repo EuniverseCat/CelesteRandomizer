@@ -51,6 +51,7 @@ namespace Celeste.Mod.Randomizer {
 
 		public List<Vector2> NodePoints = new List<Vector2>();
 		public bool broken;
+		public bool justBroken;
 		public int horizChain;
 
 

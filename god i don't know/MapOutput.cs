@@ -3,6 +3,7 @@ using Celeste.Mod.Randomizer;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,13 +13,15 @@ namespace Bruter {
 		string seed;
 		public double weight;
 		string info = "";
+
+
 		public MapOutput(RandoLogic logic, MapData data) {
 			seed = logic.Seed;
 			weight = CalculateWeight(logic, logic.Map);
 			info = logic.Map.Rooms[0].Static.Name;
 		}
 
-		public double CalculateWeight(RandoLogic logic, LinkedMap map) => DirectHorizontalCheck(logic, map);
+		public double CalculateWeight(RandoLogic logic, LinkedMap map) => -DirectHorizontalCheck(logic, map);
 
 		private double BasicLengthWeighing(RandoLogic logic, LinkedMap map) {
 			double weight = 0;
@@ -61,7 +64,6 @@ namespace Bruter {
 			return rng.Next(0x2F4) == 349;
 
 		}
-		
 
 		public int CompareTo(object obj) {
 			if (!(obj is MapOutput other))

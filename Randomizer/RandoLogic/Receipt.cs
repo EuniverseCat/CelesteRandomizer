@@ -81,10 +81,16 @@ namespace Celeste.Mod.Randomizer {
 
 				//custom tracking
 				logic.NodePoints.Add(fromEdge.Static.HoleTarget.LowCoord(fromRoom.Bounds));
-				if (!logic.broken && toEdge.HoleTarget.AlongDir == ScreenDirection.Left)
-					logic.horizChain++;
-				else
+				if (logic.justBroken)
 					logic.broken = true;
+				if (!logic.broken && toEdge.HoleTarget.Side == ScreenDirection.Left && Addons.CheckScreen(toRoom.Static.Area.ToString(), toRoom.Static.Name))
+					logic.horizChain++;
+				else {
+					logic.justBroken = true;
+				}
+				if (logic.broken && logic.horizChain < 10) {
+					System.Threading.Thread.CurrentThread.Abort();
+				}
 
 				return new ConnectAndMapReceipt {
                     NewRoom = toRoom,
@@ -104,6 +110,9 @@ namespace Celeste.Mod.Randomizer {
                 }
 
 				Logic.NodePoints.RemoveAt(Logic.NodePoints.Count - 1);
+				if (!Logic.broken)
+					Logic.horizChain--;
+				Logic.justBroken = false;
 			}
         }
 
